@@ -1,0 +1,140 @@
+# Configuration for Dr. Zero Biomedical Training on Google Colab
+# Optimized for single A100 GPU (40GB or 80GB)
+#
+# Key adaptations from multi-GPU setup:
+# - Reduced train_batch_size: 256 → 64
+# - Added gradient_accumulation: 4 (effective batch = 256)
+# - Single GPU: TP=1, DP=1
+# - More frequent checkpointing for Colab disconnects
+# - Reduced max_prompt_length if memory issues
+
+hydra:
+  searchpath:
+    - file://verl/trainer/config
+
+defaults:
+  - ppo_trainer
+  - _self_
+
+# Data configuration
+data:
+  max_prompt_length: 1536  # Reduce to 1024 if OOM
+  max_response_length: 2560  # Reduce to 2048 if OOM
+  train_batch_size: 64  # Reduced from 256 for single GPU
+  val_batch_size: 64
+  return_raw_chat: True
+  shuffle: False
+  # Training data will be specified via command line
+
+# Actor, Rollout, and Reference Policy configuration
+actor_rollout_ref:
+  hybrid_engine: True
+
+  # Model configuration
+  model:
+    path: Qwen/Qwen2.5-3B-Instruct  # Can be overridden via command line
+    enable_gradient_checkpointing: True  # Critical for memory efficiency
+
+  # Actor (policy being trained) configuration
+  actor:
+    optim:
+      lr: 1e-6
+      weight_decay: 0.01
+      warmup_steps: 10
+
+    # FSDP configuration for single GPU
+    fsdp_config:
+      param_offload: True  # Offload to CPU if OOM
+      optimizer_offload: True  # Offload optimizer states
+      gradient_checkpointing: True
+
+    # PPO specific
+    ppo_mini_batch_size: 16  # Small mini-batches
+    ppo_epochs: 1
+
+  # Rollout configuration (inference during training)
+  rollout:
+    name: sglang
+    tensor_model_parallel_size: 1  # Single GPU, no TP
+
+    # Multi-turn tool calling
+    multi_turn:
+      enable: True
+      max_assistant_turns: 5
+      max_parallel_calls: 32  # Reduced from 64 for single GPU
+      max_tool_response_length: 512
+      format: qwen
+
+    # Memory management
+    mem_fraction_static: 0.7  # Reserve 70% for model, 30% for KV cache
+
+  # Reference policy configuration
+  ref:
+    log_prob_micro_batch_size: 16
+
+# Custom reward function for biomedical validation
+custom_reward_function:
+  enable: True
+  function_name: compute_biomedical_challenger_score_batch
+
+  reward_kwargs:
+    model_name: Qwen/Qwen2.5-3B-Instruct
+    base_url: "http://127.0.0.1:8001"  # SGLang solver server
+    reward_rollout_n: 4
+
+    # Biomedical-specific reward settings
+    use_biomedical_validation: True
+    validate_pmids: True
+    check_mechanistic_reasoning: True
+
+# Trainer configuration
+trainer:
+  total_epochs: 1  # Typically run 1 epoch per iteration
+  n_gpus_per_node: 1  # Single GPU
+  nnodes: 1
+
+  # Checkpointing - more frequent for Colab
+  save_freq: 25  # Save every 25 steps (vs 50 for multi-GPU)
+  checkpoint_dir: ./checkpoints/dr-zero-biomed
+
+  # Gradient accumulation to maintain effective batch size
+  gradient_accumulation_steps: 4  # 64 * 4 = 256 effective batch
+
+  # Logging
+  logging_steps: 5
+  project_name: dr-zero-biomed
+  experiment_name: colab_training
+
+  # Optimization
+  max_grad_norm: 1.0
+  gradient_checkpointing: True
+
+  # Early stopping (optional)
+  # early_stopping_patience: 3
+  # early_stopping_threshold: 0.01
+
+# Algorithm specific (GRPO)
+algorithm:
+  name: grpo_batch
+  grpo_group_size: 1
+  reward_group_size: 5  # Group rewards for normalization
+
+  # HRPO (Hop-based Reward Policy Optimization)
+  use_hop_grouping: True  # Group by reasoning hops
+  hop_ratios: [4, 3, 2, 1]  # 1-hop, 2-hop, 3-hop, 4-hop distribution
+
+# Search tool configuration
+search_tool:
+  enabled: True
+  service_url: "http://127.0.0.1:8000/retrieve"  # PubMedBERT retriever
+  max_workers: 60  # Reduced from 120 for single GPU
+  rate_limit: 60  # Requests per second
+  timeout: 30
+  topk: 3
+
+# Evaluation configuration
+eval:
+  enabled: True
+  eval_steps: 100  # Evaluate every 100 steps
+  eval_batch_size: 32
+  save_predictions: True

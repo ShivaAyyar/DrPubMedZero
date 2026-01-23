@@ -1,0 +1,31 @@
+# Dr. Zero Biomedical Adaptation - Requirements
+# Python 3.8+ required
+
+# Core ML frameworks
+torch>=2.0.0
+transformers>=4.30.0
+accelerate>=0.20.0
+
+# Vector search
+# faiss-gpu>=1.7.4  # Use faiss-cpu if no GPU available
+faiss-cpu>=1.7.4  # Uncomment if no GPU
+
+# NLP and datasets
+datasets>=2.14.0
+sentence-transformers>=2.2.0
+tokenizers>=0.13.0
+
+# Biomedical tools
+biopython>=1.81
+
+# Utilities
+tqdm>=4.65.0
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.10.0
+
+# Experiment tracking (optional)
+wandb>=0.15.0
+
+# Additional utilities
+requests>=2.31.0

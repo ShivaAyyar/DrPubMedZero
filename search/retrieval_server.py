@@ -377,14 +377,35 @@ def retrieve_endpoint(request: QueryRequest):
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Launch the local faiss retriever.")
-    parser.add_argument("--index_path", type=str, default="/home/peterjin/mnt/index/wiki-18/e5_Flat.index", help="Corpus indexing file.")
-    parser.add_argument("--corpus_path", type=str, default="/home/peterjin/mnt/data/retrieval-corpus/wiki-18.jsonl", help="Local corpus file.")
+    parser.add_argument("--mode", type=str, default="wikipedia", choices=["wikipedia", "biomedical"],
+                        help="Retrieval mode: wikipedia (default) or biomedical")
+    parser.add_argument("--index_path", type=str, default="./corpus/e5_Flat.index", help="Corpus indexing file.")
+    parser.add_argument("--corpus_path", type=str, default="./corpus/wiki-18.jsonl", help="Local corpus file.")
     parser.add_argument("--topk", type=int, default=3, help="Number of retrieved passages for one query.")
     parser.add_argument("--retriever_name", type=str, default="e5", help="Name of the retriever model.")
     parser.add_argument("--retriever_model", type=str, default="intfloat/e5-base-v2", help="Path of the retriever model.")
     parser.add_argument('--faiss_gpu', action='store_true', help='Use GPU for computation')
 
     args = parser.parse_args()
+
+    # Apply biomedical defaults if mode is biomedical
+    if args.mode == "biomedical":
+        print("🧬 Running in BIOMEDICAL mode")
+        # Override defaults with biomedical-specific values if user didn't specify
+        if args.retriever_model == "intfloat/e5-base-v2":
+            args.retriever_model = "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext"
+            print(f"   Using PubMedBERT model: {args.retriever_model}")
+        if args.retriever_name == "e5":
+            args.retriever_name = "pubmedbert"
+            print(f"   Retriever name: {args.retriever_name}")
+        if "wiki-18" in args.index_path or "e5_Flat" in args.index_path:
+            args.index_path = "./corpus/pubmed/pubmedbert_index.faiss"
+            print(f"   Index path: {args.index_path}")
+        if "wiki-18" in args.corpus_path:
+            args.corpus_path = "./corpus/pubmed/pubmed-corpus.jsonl"
+            print(f"   Corpus path: {args.corpus_path}")
+    else:
+        print("📚 Running in WIKIPEDIA mode")
     
     # 1) Build a config (could also parse from arguments).
     #    In real usage, you'd parse your CLI arguments or environment variables.
