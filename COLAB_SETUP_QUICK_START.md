@@ -15,8 +15,31 @@ Train Dr. Zero on PubMed biomedical literature using Google Colab - **no file up
    - Get API key: https://wandb.ai/authorize
 
 3. **~50 GB Google Drive Space**
+   - **Option A**: Single account with 50+ GB
+   - **Option B**: Use Dual-Drive Setup (see below) ⭐ **RECOMMENDED**
 
 4. **Your email** (for NCBI PubMed API)
+
+### 💡 Don't Have 50 GB? Use Dual-Drive Setup!
+
+If your Colab Pro account only has 15 GB storage:
+
+**✨ Solution**: Mount two Google Drives in one session!
+
+```
+Your Setup:
+- Account A (Colab Pro): A100 GPU + 15 GB storage
+- Account B (Any account): 80 GB storage
+
+The notebook will:
+- Use Account A for compute (A100 GPU)
+- Use Account B for storage (large files)
+- Mount both drives automatically in Cell 1
+```
+
+**No extra costs, no file transfers needed!**
+
+📖 See [DUAL_DRIVE_SETUP.md](DUAL_DRIVE_SETUP.md) for full instructions.
 
 ## 🚀 Super Simple Setup (3 Steps!)
 

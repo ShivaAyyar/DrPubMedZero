@@ -27,12 +27,37 @@ Complete guide for training Dr. Zero on biomedical PubMed corpus using Google Co
   - Corpus: ~10 GB
   - Checkpoints: ~30 GB
   - Outputs: ~5 GB
+  - **💡 SOLUTION**: If you don't have 50GB in your Colab account, see [Dual Google Drive Setup](#dual-google-drive-setup-for-storage) below!
 
 - **Weights & Biases Account** (free)
   - Sign up at: https://wandb.ai
   - Get API key from: https://wandb.ai/authorize
 
 - **Email Address** (for NCBI PubMed API)
+
+### ⭐ Dual Google Drive Setup (for Storage Constraints)
+
+**Problem**: Colab Pro account has only 15 GB storage, but training needs 50 GB?
+
+**Solution**: Mount TWO Google Drives in one Colab session!
+- Use your Colab Pro account for GPU
+- Mount a second Google account with more storage for files
+
+**How it works:**
+```
+Colab Session (Account A - Colab Pro)
+├── /content/drive_pro/ (Account A - 15GB)
+│   └── Small files: logs, configs (<1 GB)
+└── /content/drive_storage/ (Account B - 80GB+)
+    └── Large files: corpus, checkpoints (~47 GB)
+```
+
+**Setup**: Cell 1 in the notebook handles everything automatically!
+- Prompts you to authenticate Account A (Colab Pro)
+- Then prompts for Account B (storage account)
+- Creates proper directory structure on both drives
+
+📖 **Full guide**: See [DUAL_DRIVE_SETUP.md](DUAL_DRIVE_SETUP.md) for detailed instructions.
 
 ### Recommended Knowledge
 
