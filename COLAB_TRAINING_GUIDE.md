@@ -87,23 +87,24 @@ Before starting, ensure you have:
 - [ ] W&B API key ready
 - [ ] Valid email for NCBI PubMed
 
-### 2. File Upload
+### 2. Repository Setup (No File Upload Needed!)
 
-You need to upload these files to Google Colab or Google Drive:
+**Good News:** You don't need to upload any files! The notebook automatically clones your GitHub repository.
 
-**Option A: Upload directly to Colab**
-```python
-# In Colab, run:
-from google.colab import files
-files.upload()  # Then select biomedical/ folder
-```
+Cell 3 in the notebook will:
+1. Clone `https://github.com/ShivaAyyar/DrPubMedZero.git`
+2. Pull latest changes if already cloned
+3. Verify all required files exist
+4. Import and configure all biomedical modules
 
-**Option B: Upload to Google Drive**
-1. Upload to `MyDrive/` in Google Drive:
-   - `biomedical/` folder (from this repository)
-   - `colab_helpers.py`
-   - `colab_config.yaml`
-2. Files will be auto-detected by the notebook
+**Everything is included:**
+- ✅ `biomedical/` module
+- ✅ `colab_helpers.py`
+- ✅ `colab_config.yaml`
+- ✅ Training scripts (`iter1/2/3_challenger_biomed.sh`)
+- ✅ Configuration files
+
+Just run Cell 3 and you're ready to go!
 
 ### 3. Configuration
 
