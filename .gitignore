@@ -9,6 +9,7 @@ tmp*
 .vscode/*
 /wandb/*
 .idea/*
+.claude/*
 
 /data/*
 /corpus/*
